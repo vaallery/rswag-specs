@@ -19,6 +19,7 @@ module Rswag
           add_verb(request, metadata)
           add_path(request, metadata, swagger_doc, parameters, example)
           add_headers(request, metadata, swagger_doc, parameters, example)
+          add_cookies(request, parameters, example)
           add_payload(request, parameters, example)
         end
       end
@@ -167,6 +168,13 @@ module Rswag
         end
 
         request[:headers] = Hash[rackified_tuples]
+      end
+
+      def add_cookies(request, parameters, example)
+        tuples = parameters
+                   .select { |p| p[:in] == :cookie }
+                   .map { |p| "#{p[:name]}=#{example.send(p[:name]).to_s}" }
+        request[:headers][:Cookie] = tuples.join(';')
       end
 
       def add_payload(request, parameters, example)
